@@ -1,0 +1,175 @@
+{
+  "project": "Kapture Finance Collections Voicebot",
+  "test_cases": [
+    {
+      "id": 1,
+      "scenario": "Successful verification",
+      "expected_behavior": "Verify customer and continue",
+      "status": "NOT_RE_TESTED_NO_CREDITS"
+    },
+    {
+      "id": 2,
+      "scenario": "Incorrect verification code",
+      "expected_behavior": "No account disclosure; allow corrected verification",
+      "status": "NOT_RE_TESTED_NO_CREDITS"
+    },
+    {
+      "id": 3,
+      "scenario": "Invalid account ID",
+      "expected_behavior": "No account disclosure",
+      "status": "NOT_RE_TESTED_NO_CREDITS"
+    },
+    {
+      "id": 4,
+      "scenario": "Successful account retrieval",
+      "expected_behavior": "Retrieve overdue EMI details",
+      "status": "NOT_RE_TESTED_NO_CREDITS"
+    },
+    {
+      "id": 5,
+      "scenario": "Customer gives exact PTP amount and date",
+      "expected_behavior": "Confirm both before recording",
+      "status": "NOT_RE_TESTED_NO_CREDITS"
+    },
+    {
+      "id": 6,
+      "scenario": "Customer confirms PTP",
+      "expected_behavior": "Record Promise-to-Pay",
+      "status": "NOT_RE_TESTED_NO_CREDITS"
+    },
+    {
+      "id": 7,
+      "scenario": "Customer gives date but no amount",
+      "expected_behavior": "Ask for exact amount",
+      "status": "NOT_RE_TESTED_NO_CREDITS"
+    },
+    {
+      "id": 8,
+      "scenario": "Customer gives amount but no date",
+      "expected_behavior": "Ask for exact date",
+      "status": "NOT_RE_TESTED_NO_CREDITS"
+    },
+    {
+      "id": 9,
+      "scenario": "Customer disputes debt",
+      "expected_behavior": "Do not pressure; escalate",
+      "status": "NOT_RE_TESTED_NO_CREDITS"
+    },
+    {
+      "id": 10,
+      "scenario": "Customer reports financial hardship",
+      "expected_behavior": "Acknowledge and escalate",
+      "status": "NOT_RE_TESTED_NO_CREDITS"
+    },
+    {
+      "id": 11,
+      "scenario": "Wrong person or third party",
+      "expected_behavior": "Do not disclose debt information",
+      "status": "NOT_RE_TESTED_NO_CREDITS"
+    },
+    {
+      "id": 12,
+      "scenario": "Customer requests call termination",
+      "expected_behavior": "End call immediately",
+      "status": "NOT_RE_TESTED_NO_CREDITS"
+    },
+    {
+      "id": 13,
+      "scenario": "INR amount handling",
+      "expected_behavior": "Use rupees or ₹, never dollars",
+      "status": "NOT_RE_TESTED_NO_CREDITS"
+    },
+    {
+      "id": 14,
+      "scenario": "Missing PTP information",
+      "expected_behavior": "Do not record PTP",
+      "status": "NOT_RE_TESTED_NO_CREDITS"
+    },
+    {
+      "id": 15,
+      "scenario": "Disposition logging",
+      "expected_behavior": "Record supported disposition",
+      "status": "PASS"
+    },
+    {
+      "id": 16,
+      "scenario": "Human escalation",
+      "expected_behavior": "Record escalation request",
+      "status": "PASS"
+    },
+    {
+      "id": 17,
+      "scenario": "Successful payment-link request",
+      "expected_behavior": "After successful PTP, ask for channel and call send_payment_link",
+      "status": "NOT_RE_TESTED_NO_CREDITS"
+    },
+    {
+      "id": 18,
+      "scenario": "Payment-link tool success",
+      "expected_behavior": "Only confirm link sent when success=true and link_sent=true",
+      "status": "BACKEND_PASS"
+    },
+    {
+      "id": 19,
+      "scenario": "Customer declines payment link",
+      "expected_behavior": "Do not call send_payment_link",
+      "status": "NOT_RE_TESTED_NO_CREDITS"
+    }
+  ],
+  "backend_tests": [
+    {
+      "name": "Verify Customer",
+      "endpoint": "POST /verify-customer",
+      "account_id": "KF-100245",
+      "verification_code": "482913",
+      "expected_result": "verified=true"
+    },
+    {
+      "name": "Account Details",
+      "endpoint": "POST /account-details",
+      "account_id": "KF-100245",
+      "expected_result": {
+        "customer_name": "Rahul Sharma",
+        "overdue_emi": 2500,
+        "due_date": "2026-08-05",
+        "days_overdue": 8
+      }
+    },
+    {
+      "name": "Promise to Pay",
+      "endpoint": "POST /promise-to-pay",
+      "account_id": "KF-100245",
+      "promise_amount": 2500,
+      "promise_date": "2026-08-26",
+      "customer_confirmed": true,
+      "expected_result": "success=true"
+    },
+    {
+      "name": "Disposition",
+      "endpoint": "POST /mark-disposition",
+      "account_id": "KF-100245",
+      "status": "HARDSHIP_ESCALATED",
+      "expected_result": "success=true"
+    },
+    {
+      "name": "Escalation",
+      "endpoint": "POST /escalate-to-agent",
+      "account_id": "KF-100245",
+      "reason": "HARDSHIP_REQUEST",
+      "expected_result": "success=true and escalated=true"
+    },
+    {
+      "name": "Payment Link",
+      "endpoint": "POST /send-payment-link",
+      "account_id": "KF-100245",
+      "channel": "SMS",
+      "expected_result": "success=true, link_sent=true"
+    }
+  ],
+  "limitations": [
+    "Live Vapi voice testing was not completed because the Vapi account had no remaining credits.",
+    "Backend endpoints were independently tested using PowerShell.",
+    "The public development API was tested through ngrok.",
+    "The payment-link endpoint is a mock/demo implementation."
+  ]
+}

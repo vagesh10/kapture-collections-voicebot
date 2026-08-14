@@ -1,0 +1,285 @@
+
+{
+  "tools": [
+    {
+      "name": "verify_customer",
+      "type": "apiRequest",
+      "description": "Verify the customer's identity before disclosing any account, loan, EMI, overdue balance, debt, or payment-status information. Use only after the customer provides their account ID and verification code.",
+      "method": "POST",
+      "url": "https://YOUR_NGROK_URL/verify-customer",
+      "requestBody": {
+        "account_id": {
+          "type": "string",
+          "required": true,
+          "description": "Customer account ID."
+        },
+        "verification_code": {
+          "type": "string",
+          "required": true,
+          "description": "Customer verification code."
+        }
+      },
+      "responseBody": {
+        "verified": {
+          "type": "boolean",
+          "required": true
+        },
+        "customer_name": {
+          "type": "string",
+          "required": true
+        },
+        "message": {
+          "type": "string",
+          "required": false
+        }
+      }
+    },
+    {
+      "name": "get_account_details",
+      "type": "apiRequest",
+      "description": "Retrieve overdue EMI amount, due date, and days overdue. Use only after the customer has successfully passed identity verification.",
+      "method": "POST",
+      "url": "https://YOUR_NGROK_URL/account-details",
+      "requestBody": {
+        "account_id": {
+          "type": "string",
+          "required": true,
+          "description": "Verified customer account ID."
+        }
+      },
+      "responseBody": {
+        "success": {
+          "type": "boolean",
+          "required": true
+        },
+        "account_id": {
+          "type": "string",
+          "required": true
+        },
+        "customer_name": {
+          "type": "string",
+          "required": true
+        },
+        "overdue_emi": {
+          "type": "number",
+          "required": true
+        },
+        "due_date": {
+          "type": "string",
+          "required": true
+        },
+        "days_overdue": {
+          "type": "number",
+          "required": true
+        },
+        "message": {
+          "type": "string",
+          "required": false
+        }
+      }
+    },
+    {
+      "name": "record_promise_to_pay",
+      "type": "apiRequest",
+      "description": "Record a confirmed Promise-to-Pay only after the customer has been successfully verified and has explicitly agreed to both the payment amount and payment date.",
+      "method": "POST",
+      "url": "https://YOUR_NGROK_URL/promise-to-pay",
+      "requestBody": {
+        "account_id": {
+          "type": "string",
+          "required": true
+        },
+        "promise_amount": {
+          "type": "number",
+          "required": true,
+          "description": "Exact amount the customer agreed to pay, in INR."
+        },
+        "promise_date": {
+          "type": "string",
+          "required": true,
+          "description": "Exact promised payment date."
+        },
+        "customer_confirmed": {
+          "type": "boolean",
+          "required": true,
+          "description": "Must be true only after the customer explicitly confirms the amount and date."
+        }
+      },
+      "responseBody": {
+        "success": {
+          "type": "boolean",
+          "required": true
+        },
+        "message": {
+          "type": "string",
+          "required": true
+        },
+        "account_id": {
+          "type": "string",
+          "required": true
+        },
+        "promise_amount": {
+          "type": "number",
+          "required": true
+        },
+        "promise_date": {
+          "type": "string",
+          "required": true
+        }
+      }
+    },
+    {
+      "name": "send_payment_link",
+      "type": "apiRequest",
+      "description": "Send a mock payment link to a verified customer after a Promise-to-Pay has been successfully recorded and the customer has agreed to receive the link.",
+      "method": "POST",
+      "url": "https://YOUR_NGROK_URL/send-payment-link",
+      "requestBody": {
+        "account_id": {
+          "type": "string",
+          "required": true,
+          "description": "Verified customer account ID."
+        },
+        "channel": {
+          "type": "string",
+          "required": true,
+          "description": "Delivery channel such as SMS or WhatsApp."
+        }
+      },
+      "responseBody": {
+        "success": {
+          "type": "boolean",
+          "required": true
+        },
+        "link_sent": {
+          "type": "boolean",
+          "required": true
+        },
+        "account_id": {
+          "type": "string",
+          "required": true
+        },
+        "channel": {
+          "type": "string",
+          "required": true
+        },
+        "payment_link": {
+          "type": "string",
+          "required": true
+        },
+        "message": {
+          "type": "string",
+          "required": true
+        }
+      }
+    },
+    {
+      "name": "mark_disposition",
+      "type": "apiRequest",
+      "description": "Record the final supported disposition for the collections conversation.",
+      "method": "POST",
+      "url": "https://YOUR_NGROK_URL/mark-disposition",
+      "requestBody": {
+        "account_id": {
+          "type": "string",
+          "required": true
+        },
+        "status": {
+          "type": "string",
+          "required": true,
+          "enum": [
+            "PTP_AGREED",
+            "ALREADY_PAID",
+            "HARDSHIP_ESCALATED",
+            "DISPUTED",
+            "WRONG_PERSON",
+            "DO_NOT_CALL",
+            "NO_RESPONSE"
+          ]
+        },
+        "notes": {
+          "type": "string",
+          "required": false
+        }
+      },
+      "responseBody": {
+        "success": {
+          "type": "boolean",
+          "required": true
+        },
+        "disposition_logged": {
+          "type": "string",
+          "required": true
+        },
+        "account_id": {
+          "type": "string",
+          "required": true
+        },
+        "notes": {
+          "type": "string",
+          "required": false
+        },
+        "timestamp": {
+          "type": "string",
+          "required": true
+        }
+      }
+    },
+    {
+      "name": "escalate_to_agent",
+      "type": "apiRequest",
+      "description": "Escalate the customer to a human agent when the customer disputes the debt, reports financial hardship, requests human assistance, or another supported escalation condition occurs.",
+      "method": "POST",
+      "url": "https://YOUR_NGROK_URL/escalate-to-agent",
+      "requestBody": {
+        "account_id": {
+          "type": "string",
+          "required": true
+        },
+        "reason": {
+          "type": "string",
+          "required": true
+        },
+        "notes": {
+          "type": "string",
+          "required": false
+        }
+      },
+      "responseBody": {
+        "success": {
+          "type": "boolean",
+          "required": true
+        },
+        "escalated": {
+          "type": "boolean",
+          "required": true
+        },
+        "account_id": {
+          "type": "string",
+          "required": true
+        },
+        "reason": {
+          "type": "string",
+          "required": true
+        },
+        "notes": {
+          "type": "string",
+          "required": false
+        },
+        "timestamp": {
+          "type": "string",
+          "required": true
+        },
+        "message": {
+          "type": "string",
+          "required": true
+        }
+      }
+    },
+    {
+      "name": "end_collections_call",
+      "type": "endCall",
+      "description": "End the collections call when the customer has no further questions, the requested action is completed, or the customer explicitly asks to end the conversation."
+    }
+  ]
+}
